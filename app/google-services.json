@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "140844062547",
+    "project_id": "shared-calendar-7d1ba",
+    "storage_bucket": "shared-calendar-7d1ba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:140844062547:android:d3ec2571c6ae46d05c33a6",
+        "android_client_info": {
+          "package_name": "com.app.sharedcalendar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAv38hvH3dd_6-A_c9EUepboOGSb4ftygY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
