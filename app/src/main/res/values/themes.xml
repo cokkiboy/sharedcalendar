@@ -6,4 +6,5 @@
     </style>
 
     <style name="Theme.SharedCalendar" parent="Base.Theme.SharedCalendar" />
+
 </resources>

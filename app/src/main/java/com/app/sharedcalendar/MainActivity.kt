@@ -1,5 +1,6 @@
 package com.app.sharedcalendar
 
+import android.content.Intent
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.View
@@ -8,6 +9,8 @@ import android.widget.CalendarView
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
+
 import com.google.firebase.database.*
 
 class MainActivity : AppCompatActivity() {
@@ -19,15 +22,23 @@ class MainActivity : AppCompatActivity() {
     lateinit var contextEditText: EditText
     lateinit var database: DatabaseReference
     lateinit var userID: String
+
     lateinit var currentDate: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        userID = intent.getStringExtra("userID") ?: ""
 
-        database = FirebaseDatabase.getInstance().reference
-        userID = "user123" // 여기에 사용자의 고유 ID를 설정하세요.
+        val firebaseAuth = FirebaseAuth.getInstance()
 
+        val currentUser = firebaseAuth.currentUser
+        if (currentUser == null) {
+            navigateToLoginActivity()
+            return
+        }
+        // 여기에 사용자의 고유 ID를 설정하세요.
+        updateButtonVisibility(false)
         calendarView = findViewById(R.id.calendarView)
         saveBtn = findViewById(R.id.saveBtn)
         updateBtn = findViewById(R.id.updateBtn)
@@ -44,12 +55,13 @@ class MainActivity : AppCompatActivity() {
         saveBtn.setOnClickListener {
             val date = getCurrentSelectedDate()
             val content = contextEditText.text.toString()
-            saveDiary(date, content)
+            saveOrUpdateDiary(date, content)
+
         }
 
         updateBtn.setOnClickListener {
             val content = contextEditText.text.toString()
-            updateDiary(currentDate, content)
+            saveOrUpdateDiary(currentDate, content)
         }
 
         deleteBtn.setOnClickListener {
@@ -62,9 +74,9 @@ class MainActivity : AppCompatActivity() {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = date
         val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH) + 1
+        val month = calendar.get(Calendar.MONTH) + 1 // 여기 수정
         val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-        return "$year-${month}-$dayOfMonth"
+        return "$year-${String.format("%02d", month)}-$dayOfMonth"
     }
 
     private fun loadDiary(date: String) {
@@ -96,6 +108,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+
     private fun saveDiary(date: String, content: String) {
         val diaryRef = database.child("diaries").child(userID).child(date)
         diaryRef.setValue(content)
@@ -108,7 +121,6 @@ class MainActivity : AppCompatActivity() {
         diaryRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val existingContent = dataSnapshot.getValue(String::class.java)
-
                 // 기존 내용을 EditText에 바인딩합니다.
                 contextEditText.setText(existingContent)
 
@@ -130,7 +142,16 @@ class MainActivity : AppCompatActivity() {
         // 수정 버튼 (updateBtn) 클릭 시 처리합니다.
         updateBtn.setOnClickListener {
             val updatedContent = contextEditText.text.toString()
-
+            val existingContent = diaryContent.text.toString()
+            if (updatedContent != existingContent) {
+                // 내용이 수정되었을 경우에만 Firebase에서 업데이트합니다.
+                saveOrUpdateDiary(currentDate, updatedContent)
+            } else {
+                // 내용이 변경되지 않았으면 뷰 모드로 전환합니다.
+                updateButtonVisibility(false)
+                contextEditText.visibility = View.INVISIBLE
+                diaryContent.visibility = View.VISIBLE
+            }
             // 수정된 내용을 다시 Firebase에 업데이트합니다.
             diaryRef.setValue(updatedContent).addOnSuccessListener {
                 // 업데이트 성공 시 수행할 작업을 여기에 추가합니다.
@@ -154,7 +175,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
+    private fun setSaveButtonVisibility(editMode: Boolean) {
+        if (editMode) {
+            saveBtn.visibility = View.VISIBLE
+            updateBtn.visibility = View.INVISIBLE
+            deleteBtn.visibility = View.INVISIBLE
+        } else {
+            saveBtn.visibility = View.INVISIBLE
+            updateBtn.visibility = View.VISIBLE
+            deleteBtn.visibility = View.VISIBLE
+        }
+    }
 
 
 
@@ -168,4 +199,40 @@ class MainActivity : AppCompatActivity() {
         deleteBtn.visibility = View.INVISIBLE
         contextEditText.setText("")
     }
+    private fun saveOrUpdateDiary(date: String, content: String) {
+        val diaryRef = database.child("diaries").child(userID).child(date)
+
+        // Check if content is empty; if it is, delete the entry; otherwise, save/update it
+        if (content.isNotEmpty()) {
+            diaryRef.setValue(content).addOnSuccessListener {
+                // Update UI and show success message (if needed)
+                updateButtonVisibility(false)
+                contextEditText.visibility = View.INVISIBLE
+                diaryContent.visibility = View.VISIBLE
+                diaryContent.text = content
+            }.addOnFailureListener { e ->
+                // Handle failure and show an error message (if needed)
+            }
+        } else {
+            // Content is empty, delete the entry
+            deleteDiary(date)
+        }
+    }
+    private fun updateButtonVisibility(editMode: Boolean) {
+        if (editMode) {
+            saveBtn.visibility = View.INVISIBLE
+            updateBtn.visibility = View.VISIBLE
+            deleteBtn.visibility = View.VISIBLE
+        } else {
+            saveBtn.visibility = View.VISIBLE
+            updateBtn.visibility = View.INVISIBLE
+            deleteBtn.visibility = View.INVISIBLE
+        }
+    }
+    private fun navigateToLoginActivity() {
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish() // LoginActivity로 이동한 후 현재 Activity를 종료하여 뒤로 돌아갈 수 없도록 합니다.
+    }
+
 }
