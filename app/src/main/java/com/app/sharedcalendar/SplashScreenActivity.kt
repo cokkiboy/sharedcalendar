@@ -1,4 +1,5 @@
 package com.app.sharedcalendar
+
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -30,5 +31,4 @@ class SplashScreenActivity: AppCompatActivity() {
         // 현재 액티비티를 종료합니다.
         finish()
     }
-
 }

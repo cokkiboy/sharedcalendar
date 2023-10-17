@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class MainActivity : AppCompatActivity() {
-    lateinit var calendarView: CalendarView
+    //lateinit var calendarView: CalendarView
     lateinit var saveBtn: Button
     lateinit var updateBtn: Button
     lateinit var deleteBtn: Button
@@ -22,14 +22,17 @@ class MainActivity : AppCompatActivity() {
     lateinit var contextEditText: EditText
     lateinit var database: DatabaseReference
     lateinit var userID: String
-
+    private lateinit var calendarView: CalendarView
+    private lateinit var selectedDateTextView: TextView
     lateinit var currentDate: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        calendarView = findViewById(R.id.calendarView)
+        //selectedDateTextView = findViewById(R.id.selectedDateTextView)
         setContentView(R.layout.activity_main)
         userID = intent.getStringExtra("userID") ?: ""
-
+        database = FirebaseDatabase.getInstance().reference
         val firebaseAuth = FirebaseAuth.getInstance()
 
         val currentUser = firebaseAuth.currentUser
@@ -210,6 +213,8 @@ class MainActivity : AppCompatActivity() {
                 contextEditText.visibility = View.INVISIBLE
                 diaryContent.visibility = View.VISIBLE
                 diaryContent.text = content
+                contextEditText.setText("")
+
             }.addOnFailureListener { e ->
                 // Handle failure and show an error message (if needed)
             }

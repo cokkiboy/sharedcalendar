@@ -23,32 +23,31 @@ class RegisterActivity : AppCompatActivity() {
         // Firebase Authentication 초기화
         firebaseAuth = FirebaseAuth.getInstance()
 
-        // XML 레이아웃 파일에 정의된 UI 요소들을 연결합니다.
+        // UI 요소들과 연결
         nameEditText = findViewById(R.id.join_name)
         emailEditText = findViewById(R.id.join_email)
         passwordEditText = findViewById(R.id.join_password)
         passwordConfirmEditText = findViewById(R.id.join_pwck)
         joinButton = findViewById(R.id.join_button)
 
-        // 회원가입 버튼 클릭 리스너를 설정합니다.
+        // 회원가입 버튼 클릭 리스너 설정
         joinButton.setOnClickListener {
             val name = nameEditText.text.toString()
             val email = emailEditText.text.toString()
             val password = passwordEditText.text.toString()
             val passwordConfirm = passwordConfirmEditText.text.toString()
 
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {
+            if (areFieldsEmpty(name, email, password, passwordConfirm)) {
                 showToast("모든 필드를 입력하세요.")
-            } else if (password != passwordConfirm) {
+            } else if (!arePasswordsMatching(password, passwordConfirm)) {
                 showToast("비밀번호와 비밀번호 확인이 일치하지 않습니다.")
             } else {
-                // Firebase Authentication을 사용하여 이메일 및 비밀번호로 회원가입 시도
+                // Firebase Authentication을 사용하여 회원가입 시도
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
                             // 회원가입 성공
                             showToast("회원가입 성공")
-                            // 여기에서 회원가입 이후의 화면으로 이동하거나 작업을 수행할 수 있습니다.
                             navigateToLoginActivity()
                         } else {
                             // 회원가입 실패
@@ -59,6 +58,14 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
+    private fun areFieldsEmpty(name: String, email: String, password: String, passwordConfirm: String): Boolean {
+        return name.isEmpty() || email.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()
+    }
+
+    private fun arePasswordsMatching(password: String, passwordConfirm: String): Boolean {
+        return password == passwordConfirm
+    }
+
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
@@ -66,6 +73,6 @@ class RegisterActivity : AppCompatActivity() {
     private fun navigateToLoginActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)
-        finish() // Optional: Finish the current activity so that it can't be navigated back to.
+        finish() // Optional: 현재 활동을 종료하여 뒤로 돌아갈 수 없도록 설정
     }
 }
