@@ -15,7 +15,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var passwordConfirmEditText: EditText
     private lateinit var joinButton: Button
     private lateinit var firebaseAuth: FirebaseAuth
-
+    private lateinit var cancelbutton:Button
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
@@ -29,7 +29,7 @@ class RegisterActivity : AppCompatActivity() {
         passwordEditText = findViewById(R.id.join_password)
         passwordConfirmEditText = findViewById(R.id.join_pwck)
         joinButton = findViewById(R.id.join_button)
-
+        cancelbutton =findViewById(R.id.cancel_button)
         // 회원가입 버튼 클릭 리스너 설정
         joinButton.setOnClickListener {
             val name = nameEditText.text.toString()
@@ -56,6 +56,10 @@ class RegisterActivity : AppCompatActivity() {
                     }
             }
         }
+        cancelbutton.setOnClickListener {
+            navigateToLoginActivity()
+        }
+
     }
 
     private fun areFieldsEmpty(name: String, email: String, password: String, passwordConfirm: String): Boolean {

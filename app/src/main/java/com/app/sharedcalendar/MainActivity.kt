@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         calendarView = findViewById(R.id.calendarView)
-        //selectedDateTextView = findViewById(R.id.selectedDateTextView)
+
         setContentView(R.layout.activity_main)
         userID = intent.getStringExtra("userID") ?: ""
         database = FirebaseDatabase.getInstance().reference
@@ -61,8 +61,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         updateBtn.setOnClickListener {
-            val content = contextEditText.text.toString()
-            saveOrUpdateDiary(currentDate, content)
+            val updatedContent = contextEditText.text.toString()
+            val existingContent = diaryContent.text.toString()
+            if (updatedContent != existingContent) {
+                // 내용이 수정되었을 경우에만 Firebase에서 업데이트
+                saveOrUpdateDiary(currentDate, updatedContent)
+            } else {
+                // 내용이 변경되지 않았으면 뷰 모드로 전환
+                updateButtonVisibility(false)
+                contextEditText.visibility = View.INVISIBLE
+                diaryContent.visibility = View.VISIBLE
+            }
         }
 
         deleteBtn.setOnClickListener {
