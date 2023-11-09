@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
-
 import com.google.firebase.database.*
 
 class MainActivity : AppCompatActivity() {
@@ -115,7 +114,17 @@ class MainActivity : AppCompatActivity() {
         val diaryRef = database.child("diaries").child(userID).child(date)
         diaryRef.setValue(content)
     }
-
+    private fun setSaveButtonVisibility(editMode: Boolean) {
+        if (editMode) {
+            saveBtn.visibility = View.VISIBLE
+            updateBtn.visibility = View.INVISIBLE
+            deleteBtn.visibility = View.INVISIBLE
+        } else {
+            saveBtn.visibility = View.INVISIBLE
+            updateBtn.visibility = View.VISIBLE
+            deleteBtn.visibility = View.VISIBLE
+        }
+    }
     private fun updateDiary(date: String, content: String) {
         val diaryRef = database.child("diaries").child(userID).child(date)
 
@@ -177,17 +186,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setSaveButtonVisibility(editMode: Boolean) {
-        if (editMode) {
-            saveBtn.visibility = View.VISIBLE
-            updateBtn.visibility = View.INVISIBLE
-            deleteBtn.visibility = View.INVISIBLE
-        } else {
-            saveBtn.visibility = View.INVISIBLE
-            updateBtn.visibility = View.VISIBLE
-            deleteBtn.visibility = View.VISIBLE
-        }
-    }
+
 
 
 

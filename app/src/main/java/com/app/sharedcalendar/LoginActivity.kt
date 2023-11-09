@@ -6,7 +6,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuth  //로그인 부분 해쉬처리
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var usernameEditText: EditText
@@ -26,7 +26,7 @@ class LoginActivity : AppCompatActivity() {
         usernameEditText = findViewById(R.id.usernameEditText)
         passwordEditText = findViewById(R.id.passwordEditText)
         loginButton = findViewById(R.id.loginButton)
-        joinButton = findViewById(R.id.join)
+        joinButton = findViewById(R.id.join_button)
 
         // 로그인 버튼 클릭 리스너를 설정합니다.
         loginButton.setOnClickListener {
@@ -36,7 +36,7 @@ class LoginActivity : AppCompatActivity() {
             // Firebase Authentication을 사용하여 이메일 및 비밀번호로 로그인 시도
             firebaseAuth.signInWithEmailAndPassword(username, password)
                 .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
+                    if (task != null && task.isSuccessful) {
                         // 로그인 성공
                         showToast("로그인 완료")
 
@@ -44,6 +44,11 @@ class LoginActivity : AppCompatActivity() {
                         navigateMainActivity()
                     } else {
                         // 로그인 실패
+                        if (task != null) {
+                            showToast("실패 이유: ${task.exception?.message}")
+                        } else {
+                            showToast("로그인 작업이 널입니다.")
+                        }
                         showToast("로그인 실패: ${task.exception?.message}")
                     }
                 }
