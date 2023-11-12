@@ -123,17 +123,7 @@ class MainActivity : AppCompatActivity() {
         val diaryRef = database.child("diaries").child(userID).child(date)
         diaryRef.setValue(content)
     }
-    private fun setSaveButtonVisibility(editMode: Boolean) {
-        if (editMode) {
-            saveBtn.visibility = View.VISIBLE
-            updateBtn.visibility = View.INVISIBLE
-            deleteBtn.visibility = View.INVISIBLE
-        } else {
-            saveBtn.visibility = View.INVISIBLE
-            updateBtn.visibility = View.VISIBLE
-            deleteBtn.visibility = View.VISIBLE
-        }
-    }
+
     private fun updateDiary(date: String, content: String) {
         val diaryRef = database.child("diaries").child(userID).child(date)
 
@@ -195,10 +185,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
-
-
     private fun deleteDiary(date: String) {
         val diaryRef = database.child("diaries").child(userID).child(date)
         diaryRef.removeValue()
@@ -209,6 +195,7 @@ class MainActivity : AppCompatActivity() {
         deleteBtn.visibility = View.INVISIBLE
         contextEditText.setText("")
     }
+
     private fun saveOrUpdateDiary(date: String, content: String) {
         val diaryRef = database.child("diaries").child(userID).child(date)
 
@@ -230,6 +217,7 @@ class MainActivity : AppCompatActivity() {
             deleteDiary(date)
         }
     }
+
     private fun updateButtonVisibility(editMode: Boolean) {
         if (editMode) {
             saveBtn.visibility = View.INVISIBLE
@@ -241,10 +229,10 @@ class MainActivity : AppCompatActivity() {
             deleteBtn.visibility = View.INVISIBLE
         }
     }
+
     private fun navigateToLoginActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)
         finish() // LoginActivity로 이동한 후 현재 Activity를 종료하여 뒤로 돌아갈 수 없도록 합니다.
     }
-
 }
