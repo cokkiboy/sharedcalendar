@@ -2,11 +2,13 @@ package com.app.sharedcalendar
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth  //로그인 부분 해쉬처리
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var usernameEditText: EditText
@@ -18,7 +20,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
+        FirebaseApp.initializeApp(this)
         // Firebase Authentication 초기화
         firebaseAuth = FirebaseAuth.getInstance()
 
@@ -34,24 +36,20 @@ class LoginActivity : AppCompatActivity() {
             val password = passwordEditText.text.toString()
 
             // Firebase Authentication을 사용하여 이메일 및 비밀번호로 로그인 시도
-            firebaseAuth.signInWithEmailAndPassword(username, password)
-                .addOnCompleteListener(this) { task ->
-                    if (task != null && task.isSuccessful) {
-                        // 로그인 성공
-                        showToast("로그인 완료")
-
-                        // 여기에서 로그인 이후의 화면으로 이동합니다.
-                        navigateMainActivity()
-                    } else {
-                        // 로그인 실패
-                        if (task != null) {
-                            showToast("실패 이유: ${task.exception?.message}")
+            if (username.isNotEmpty() && password.isNotEmpty()) {
+                firebaseAuth.signInWithEmailAndPassword(username, password)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            showToast("로그인 완료")
+                            navigateMainActivity()
                         } else {
-                            showToast("로그인 작업이 널입니다.")
+                            showToast("로그인 실패: ${task.exception?.message}")
+                            Log.e("LoginActivity", "Firebase 로그인 실패: ${task.exception}", task.exception)
                         }
-                        showToast("로그인 실패: ${task.exception?.message}")
                     }
-                }
+            } else {
+                showToast("이메일 또는 비밀번호를 입력하세요.")
+            }
         }
 
         joinButton.setOnClickListener {
@@ -67,12 +65,12 @@ class LoginActivity : AppCompatActivity() {
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("userID", firebaseAuth.currentUser?.uid)
         startActivity(intent)
-        finish() // Optional: Finish the current activity so that it can't be navigated back to.
+        finish() // LoginActivity를 종료하여 뒤로 가기 버튼으로 돌아갈 수 없도록 합니다.
     }
 
     private fun navigateToRegisterActivity() {
         val intent = Intent(this, RegisterActivity::class.java)
-        // intent 화면 전환하는 함수
         startActivity(intent)
+        finish()
     }
 }

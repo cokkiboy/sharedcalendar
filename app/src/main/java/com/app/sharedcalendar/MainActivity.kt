@@ -13,22 +13,35 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class MainActivity : AppCompatActivity() {
+    override fun onBackPressed() {
+        // 여기에 뒤로가기 버튼을 눌렀을 때의 동작을 정의합니다.
+        // 여기에서는 아무 동작도 하지 않도록 설정했습니다.
+    }
 
     lateinit var saveBtn: Button
     lateinit var updateBtn: Button
     lateinit var deleteBtn: Button
     lateinit var diaryContent: TextView
     lateinit var contextEditText: EditText
-    lateinit var database: DatabaseReference
-    lateinit var userID: String
+    private lateinit var database: DatabaseReference
+    private lateinit var userID: String
     private lateinit var calendarView: CalendarView
-    lateinit var currentDate: String
+    private lateinit var currentDate: String
+    private var selectedDate: String =""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        saveBtn = findViewById(R.id.saveBtn)
+        updateBtn = findViewById(R.id.updateBtn)
+        deleteBtn = findViewById(R.id.deleteBtn)
+        diaryContent = findViewById(R.id.diaryContent)
+        contextEditText = findViewById(R.id.contextEditText)
         calendarView = findViewById(R.id.calendarView)
 
-        setContentView(R.layout.activity_main)
+        //selectedDateTextView = findViewById(R.id.selectedDateTextView)
+
         userID = intent.getStringExtra("userID") ?: ""
         database = FirebaseDatabase.getInstance().reference
         val firebaseAuth = FirebaseAuth.getInstance()
@@ -40,12 +53,7 @@ class MainActivity : AppCompatActivity() {
         }
         // 여기에 사용자의 고유 ID를 설정하세요.
         updateButtonVisibility(false)
-        calendarView = findViewById(R.id.calendarView)
-        saveBtn = findViewById(R.id.saveBtn)
-        updateBtn = findViewById(R.id.updateBtn)
-        deleteBtn = findViewById(R.id.deleteBtn)
-        diaryContent = findViewById(R.id.diaryContent)
-        contextEditText = findViewById(R.id.contextEditText)
+
 
         calendarView.setOnDateChangeListener { view, year, month, dayOfMonth ->
             val date = "$year-${month + 1}-$dayOfMonth"
@@ -53,30 +61,27 @@ class MainActivity : AppCompatActivity() {
             loadDiary(date)
         }
 
-        saveBtn.setOnClickListener {
-            val date = getCurrentSelectedDate()
-            val content = contextEditText.text.toString()
-            saveOrUpdateDiary(date, content)
 
-        }
 
-        updateBtn.setOnClickListener {
-            val updatedContent = contextEditText.text.toString()
-            val existingContent = diaryContent.text.toString()
-            if (updatedContent != existingContent) {
-                // 내용이 수정되었을 경우에만 Firebase에서 업데이트
-                saveOrUpdateDiary(currentDate, updatedContent)
-            } else {
-                // 내용이 변경되지 않았으면 뷰 모드로 전환
-                updateButtonVisibility(false)
-                contextEditText.visibility = View.INVISIBLE
-                diaryContent.visibility = View.VISIBLE
-            }
-        }
+
 
         deleteBtn.setOnClickListener {
             deleteDiary(currentDate)
         }
+        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            val date = "$year-${month + 1}-$dayOfMonth"
+            selectedDate = date
+
+            // 일정 입력 액티비티로 전달할 Intent 생성
+
+        }
+        saveBtn.setOnClickListener {
+            val intent = Intent(this, ScheduleInputActivity::class.java)
+            intent.putExtra("selectedDate", selectedDate)
+            startActivity(intent)
+
+        }
+
     }
 
     private fun getCurrentSelectedDate(): String {
@@ -123,7 +128,17 @@ class MainActivity : AppCompatActivity() {
         val diaryRef = database.child("diaries").child(userID).child(date)
         diaryRef.setValue(content)
     }
-
+    private fun setSaveButtonVisibility(editMode: Boolean) {
+        if (editMode) {
+            saveBtn.visibility = View.VISIBLE
+            updateBtn.visibility = View.INVISIBLE
+            deleteBtn.visibility = View.INVISIBLE
+        } else {
+            saveBtn.visibility = View.INVISIBLE
+            updateBtn.visibility = View.VISIBLE
+            deleteBtn.visibility = View.VISIBLE
+        }
+    }
     private fun updateDiary(date: String, content: String) {
         val diaryRef = database.child("diaries").child(userID).child(date)
 
@@ -182,8 +197,13 @@ class MainActivity : AppCompatActivity() {
                 // e에는 실패에 관한 정보가 포함됩니다.
                 // 실패 시 사용자에게 메시지를 표시하거나 필요한 오류 처리를 수행합니다.
             }
+            contextEditText.isEnabled = false
         }
     }
+
+
+
+
 
     private fun deleteDiary(date: String) {
         val diaryRef = database.child("diaries").child(userID).child(date)
@@ -195,29 +215,34 @@ class MainActivity : AppCompatActivity() {
         deleteBtn.visibility = View.INVISIBLE
         contextEditText.setText("")
     }
-
     private fun saveOrUpdateDiary(date: String, content: String) {
         val diaryRef = database.child("diaries").child(userID).child(date)
 
-        // Check if content is empty; if it is, delete the entry; otherwise, save/update it
+        // 내용이 비어있지 않은 경우에만 처리
         if (content.isNotEmpty()) {
             diaryRef.setValue(content).addOnSuccessListener {
-                // Update UI and show success message (if needed)
+                // UI 업데이트 및 성공 메시지 표시 (필요한 경우)
                 updateButtonVisibility(false)
+
+                // 일정을 저장 또는 업데이트한 후 EditText 비활성화
                 contextEditText.visibility = View.INVISIBLE
                 diaryContent.visibility = View.VISIBLE
                 diaryContent.text = content
                 contextEditText.setText("")
 
+                // 새로운 날짜를 선택할 수 있도록 CalendarView 활성화
+                calendarView.isEnabled = true
             }.addOnFailureListener { e ->
-                // Handle failure and show an error message (if needed)
+                // 실패 시 처리 및 오류 메시지 표시 (필요한 경우)
             }
         } else {
-            // Content is empty, delete the entry
+            // 내용이 비어있으면 항목 삭제
             deleteDiary(date)
+
+            // 새로운 날짜를 선택할 수 있도록 CalendarView 활성화
+            calendarView.isEnabled = true
         }
     }
-
     private fun updateButtonVisibility(editMode: Boolean) {
         if (editMode) {
             saveBtn.visibility = View.INVISIBLE
@@ -229,10 +254,15 @@ class MainActivity : AppCompatActivity() {
             deleteBtn.visibility = View.INVISIBLE
         }
     }
-
     private fun navigateToLoginActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)
         finish() // LoginActivity로 이동한 후 현재 Activity를 종료하여 뒤로 돌아갈 수 없도록 합니다.
     }
+    private fun navigateToScheduleinputActivity() {
+        val intent = Intent(this, ScheduleInputActivity::class.java)
+        startActivity(intent)
+        //finish() // LoginActivity로 이동한 후 현재 Activity를 종료하여 뒤로 돌아갈 수 없도록 합니다.
+    }
+
 }

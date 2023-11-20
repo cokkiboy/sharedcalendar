@@ -1,0 +1,33 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- 현재 년도와 날짜를 표시하는 TextView -->
+    <TextView
+        android:id="@+id/textViewDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="년도 및 날짜를 표시할 곳" />
+
+    <!-- 일정 입력을 위한 EditText -->
+    <EditText
+        android:id="@+id/editTextSchedule"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="일정을 입력하세요" />
+
+    <!-- 시간대 선택을 위한 TimePicker -->
+    <TimePicker
+        android:id="@+id/timePicker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- 저장 버튼 -->
+    <Button
+        android:id="@+id/buttonSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="저장" />
+</LinearLayout>

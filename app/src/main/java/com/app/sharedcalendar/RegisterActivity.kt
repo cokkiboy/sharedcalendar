@@ -47,6 +47,7 @@ class RegisterActivity : AppCompatActivity() {
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
                             // 회원가입 성공
+                            //Log.d("MyApp", "회원가입 성공")
                             showToast("회원가입 성공")
                             navigateToLoginActivity()
                         } else {
