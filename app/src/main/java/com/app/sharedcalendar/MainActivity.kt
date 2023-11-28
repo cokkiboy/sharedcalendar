@@ -9,6 +9,7 @@ import android.widget.CalendarView
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.app.sharedcalendar.Schedule.ScheduleInputActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
@@ -245,7 +246,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun updateButtonVisibility(editMode: Boolean) {
         if (editMode) {
-            saveBtn.visibility = View.INVISIBLE
+            this.saveBtn.visibility = View.INVISIBLE
             updateBtn.visibility = View.VISIBLE
             deleteBtn.visibility = View.VISIBLE
         } else {
@@ -259,10 +260,6 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
         finish() // LoginActivity로 이동한 후 현재 Activity를 종료하여 뒤로 돌아갈 수 없도록 합니다.
     }
-    private fun navigateToScheduleinputActivity() {
-        val intent = Intent(this, ScheduleInputActivity::class.java)
-        startActivity(intent)
-        //finish() // LoginActivity로 이동한 후 현재 Activity를 종료하여 뒤로 돌아갈 수 없도록 합니다.
-    }
+
 
 }

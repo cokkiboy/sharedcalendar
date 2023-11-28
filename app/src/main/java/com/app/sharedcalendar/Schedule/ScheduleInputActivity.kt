@@ -1,5 +1,4 @@
-package com.app.sharedcalendar
-
+package com.app.sharedcalendar.Schedule
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -8,11 +7,13 @@ import android.widget.TextView
 import android.widget.TimePicker
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.app.sharedcalendar.MainActivity
+import com.app.sharedcalendar.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.*
-
 class ScheduleInputActivity : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
@@ -39,14 +40,17 @@ class ScheduleInputActivity : AppCompatActivity() {
 
         val btnSaveSchedule = findViewById<Button>(R.id.buttonSave)
         val editTextSchedule = findViewById<EditText>(R.id.editTextSchedule)
-        val timePicker = findViewById<TimePicker>(R.id.timePicker)
+        val timePickerStart = findViewById<TimePicker>(R.id.timePickerStart)
+        val timePickerEnd = findViewById<TimePicker>(R.id.timePickerEnd)
 
         btnSaveSchedule.setOnClickListener {
             val schedule = editTextSchedule.text.toString()
-            val hour = timePicker.currentHour
-            val minute = timePicker.currentMinute
+            val hourStart = timePickerStart.currentHour
+            val minuteStart = timePickerStart.currentMinute
+            val hourEnd = timePickerEnd.currentHour
+            val minuteEnd = timePickerEnd.currentMinute
 
-            saveScheduleToFirebase(schedule, hour, minute)
+            saveScheduleToFirebase(schedule, hourStart, minuteStart, hourEnd, minuteEnd)
         }
     }
 
@@ -61,14 +65,24 @@ class ScheduleInputActivity : AppCompatActivity() {
         return dateFormat.format(calendar.time)
     }
 
-    private fun saveScheduleToFirebase(schedule: String, hour: Int, minute: Int) {
+    private fun saveScheduleToFirebase(
+        schedule: String,
+        hourStart: Int,
+        minuteStart: Int,
+        hourEnd: Int,
+        minuteEnd: Int
+    ) {
         // "schedules" 노드에 일정 저장
         val scheduleRef = database.child("schedules").child(userID).push()
 
+        val startTime = String.format(Locale.getDefault(), "%02d:%02d", hourStart, minuteStart)
+        val endTime = String.format(Locale.getDefault(), "%02d:%02d", hourEnd, minuteEnd)
+
         val scheduleData = HashMap<String, Any>()
         scheduleData["schedule"] = schedule
-        scheduleData["hour"] = hour
-        scheduleData["minute"] = minute
+        scheduleData["startTime"] = startTime
+        scheduleData["endTime"] = endTime
+        scheduleData["date"] = selectedDate
 
         scheduleRef.setValue(scheduleData)
             .addOnSuccessListener {
@@ -87,6 +101,7 @@ class ScheduleInputActivity : AppCompatActivity() {
     private fun navigateToMainActivity() {
         // 메인 엑티비티로 이동
         val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra("userID", userID)
         startActivity(intent)
 
         // 현재 엑티비티 종료
