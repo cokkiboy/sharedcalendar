@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.app.sharedcalendar.R
-import com.app.sharedcalendar.ScheduleItem
 
 class ScheduleAdapter(private var scheduleList: List<ScheduleItem>) :
     RecyclerView.Adapter<ScheduleAdapter.ViewHolder>() {

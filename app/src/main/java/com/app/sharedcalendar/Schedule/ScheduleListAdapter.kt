@@ -1,7 +1,5 @@
 package com.app.sharedcalendar.Schedule
 
-
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
