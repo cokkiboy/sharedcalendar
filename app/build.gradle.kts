@@ -42,7 +42,8 @@ android {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
-
+    /*implementation ('androidx.legacy:legacy-support-v4:1.0.0') // DrawerLayout
+    implementation ('com.google.android.material:material:1.0.0')*/ // NavigationView
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("androidx.core:core-ktx:1.9.0")
     //implementation("com.google.firebase:firebase-auth-ktx:22.1.2.")
