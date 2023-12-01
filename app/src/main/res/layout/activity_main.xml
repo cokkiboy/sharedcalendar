@@ -40,8 +40,6 @@
         app:layout_constraintTop_toBottomOf="@+id/title"
         app:layout_constraintTop_toTopOf="parent" />
 
-
-
     <!-- 일기 내용 (TextView, 미리보기 모드) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -69,7 +67,7 @@
         android:id="@+id/buttonGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="saveBtn,updateBtn,deleteBtn"
+        app:constraint_referenced_ids="saveBtn,updateBtn,deleteBtn,logoutBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/diaryContent" />
@@ -105,8 +103,20 @@
         android:text="일정 삭제"
         app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
         app:layout_constraintStart_toEndOf="@+id/updateBtn"
+
+        android:visibility="invisible" />
+
+    <!-- 로그아웃 버튼 -->
+    <Button
+        android:id="@+id/logoutBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="로그아웃"
+        app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
+        app:layout_constraintStart_toEndOf="@+id/deleteBtn"
         app:layout_constraintEnd_toEndOf="parent"
         android:visibility="invisible" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigationView"
         android:layout_width="0dp"
@@ -122,4 +132,5 @@
         app:itemTextColor="@drawable/menu_click_color"
         app:menu="@menu/bottom_navigation_menu"
         tools:ignore="MissingConstraints" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,11 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/calenderFragment"
-        android:title="Calendar" />
+        android:title="로그아웃" />
     <item
         android:id="@+id/homeFragment"
         android:title="Home" />
     <item
         android:id="@+id/myPageFragment"
-        android:title="My Page" />
+        android:title="검색" />
 </menu>
