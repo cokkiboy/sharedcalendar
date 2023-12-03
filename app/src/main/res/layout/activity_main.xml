@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -62,12 +63,12 @@
         app:layout_constraintTop_toBottomOf="@+id/calendarView"
         android:visibility="visible" />
 
-    <!-- 저장, 수정, 삭제 버튼 그룹 -->
+    <!-- 저장, 수정, 친구 추가 버튼 그룹 -->
     <androidx.constraintlayout.widget.Group
         android:id="@+id/buttonGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="saveBtn,updateBtn,deleteBtn"
+        app:constraint_referenced_ids="saveBtn,updateBtn,addFriendButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/diaryContent" />
@@ -92,22 +93,28 @@
         android:text="일정 수정"
         app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
         app:layout_constraintStart_toEndOf="@+id/saveBtn"
-        app:layout_constraintEnd_toStartOf="@+id/deleteBtn"
+        app:layout_constraintEnd_toStartOf="@+id/addFriendButton"
         android:visibility="visible" />
 
-    <!-- 삭제 버튼 -->
+    <!-- 친구 추가 버튼 -->
     <Button
-        android:id="@+id/deleteBtn"
+        android:id="@+id/addFriendButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="일정 삭제"
+        android:text="친구 추가"
         app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
         app:layout_constraintStart_toEndOf="@+id/updateBtn"
-
         android:visibility="visible" />
 
-    <!-- 로그아웃 버튼 -->
-
+    <!-- 사용자 목록 버튼 -->
+    <Button
+        android:id="@+id/userListButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="사용자 목록"
+        app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
+        app:layout_constraintStart_toEndOf="@+id/addFriendButton"
+        android:visibility="visible" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigationView"
@@ -123,13 +130,6 @@
         app:menu="@menu/bottom_navigation_menu"
         tools:ignore="MissingConstraints" />
 
-
     <!-- Your existing layout components -->
 
-        <!-- 친구 추가 버튼 -->
-
-
-        <!-- Your existing layout components -->
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
+</androidx.constraintlayout.widget.ConstraintLayout>

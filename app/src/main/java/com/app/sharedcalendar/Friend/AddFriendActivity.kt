@@ -1,4 +1,4 @@
-package com.app.sharedcalendar.AddFriend
+package com.app.sharedcalendar.Friend
 
 import android.os.Bundle
 import android.widget.Button
@@ -16,6 +16,10 @@ class AddFriendActivity : AppCompatActivity() {
     private lateinit var friendNameEditText: EditText
     private lateinit var addFriendButton: Button
     private lateinit var databaseReference: DatabaseReference
+
+    // 가정: FriendManager가 싱글톤으로 구현되어 있다고 가정
+    private val friendManager: FriendManager = FriendManager()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_friend)
@@ -38,19 +42,10 @@ class AddFriendActivity : AppCompatActivity() {
             val friendName = friendNameEditText.text.toString().trim()
 
             if (friendName.isNotEmpty()) {
-                // Assuming "friendships" is the node where friend relationships are stored
-                val friendRelationRef = databaseReference.child("friendships").push()
+                // 친구 추가 요청 보내기
+                friendManager.sendFriendRequest(currentUserId, friendName)
 
-                // Store friend relationship information
-                friendRelationRef.child(currentUserId).setValue(true)
-
-                // Add friend to user's friend list
-                val currentUserFriendRef =
-                    databaseReference.child("users").child(currentUserId).child("friends")
-                        .child(friendRelationRef.key!!)
-                currentUserFriendRef.setValue(true)
-
-                showToast("친구 추가 완료")
+                showToast("친구 추가 요청을 보냈습니다.")
                 finish()
             } else {
                 showToast("친구 이름을 입력하세요.")

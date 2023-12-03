@@ -44,7 +44,7 @@ class LoginActivity : AppCompatActivity() {
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
                             showToast("로그인 완료")
-                            navigateMainActivity()
+                            saveUserInfoAndNavigateToMainActivity(firebaseAuth.currentUser)
                         } else {
                             showToast("로그인 실패: ${task.exception?.message}")
                             Log.e("LoginActivity", "Firebase 로그인 실패: ${task.exception}", task.exception)
@@ -76,13 +76,14 @@ class LoginActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
     private fun saveUserInfoAndNavigateToMainActivity(currentUser: FirebaseUser?) {
         currentUser?.let {
             val userId = it.uid
             val username = it.displayName ?: "DefaultUsername"
 
             // Firebase Realtime Database에 사용자 정보 저장
-            val userInfo = User(userId, username)
+            val userInfo = User( uid= userId , username=username)
             val databaseReference = FirebaseDatabase.getInstance().reference
             databaseReference.child("users").child(userId).setValue(userInfo)
 

@@ -21,12 +21,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity android:name=".Friend.AddFriendActivity"/>
         <activity android:name=".RegisterActivity"/>
         <activity android:name=".MainActivity" />
         <activity android:name=".Schedule.ScheduleInputActivity"/>
         <activity android:name=".Schedule.ScheduleListActivity" />
-
+        <activity android:name=".User.UserListActivity"/>
     </application>
 
 </manifest>

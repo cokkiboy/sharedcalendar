@@ -11,10 +11,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.app.sharedcalendar.AddFriend.AddFriendActivity
+import com.app.sharedcalendar.Friend.AddFriendActivity
 import com.app.sharedcalendar.Schedule.ScheduleAdapter
 import com.app.sharedcalendar.Schedule.ScheduleInputActivity
 import com.app.sharedcalendar.Schedule.ScheduleListActivity
+import com.app.sharedcalendar.User.UserListActivity
 
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -45,11 +46,11 @@ class MainActivity : AppCompatActivity() {
 
         saveBtn = findViewById(R.id.saveBtn)
         updateBtn = findViewById(R.id.updateBtn)
-        deleteBtn = findViewById(R.id.deleteBtn)
+        val userListButton: Button = findViewById(R.id.userListButton)
         diaryContent = findViewById(R.id.diaryContent)
         calendarView = findViewById(R.id.calendarView)
         bottomNavigationView = findViewById(R.id.navigationView)
-
+        val addFriendButton: Button = findViewById(R.id.addFriendButton)
         userID = intent.getStringExtra("userID") ?: ""
         database = FirebaseDatabase.getInstance().reference
         val firebaseAuth = FirebaseAuth.getInstance()
@@ -67,9 +68,8 @@ class MainActivity : AppCompatActivity() {
             loadDiary(date)
         }
 
-        deleteBtn.setOnClickListener {
-            navigateToScheduleList()
-            loadDiary(selectedDate)
+        userListButton.setOnClickListener {
+            navigateToUserListActivity()
         }
 
         updateBtn.setOnClickListener {
@@ -83,7 +83,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             loadDiary(selectedDate)
         }
-
+        addFriendButton.setOnClickListener {
+            // Handle button click event, e.g., navigate to AddFriendActivity
+            navigateToAddFriendActivity()
+        }
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         scheduleAdapter = ScheduleAdapter(ArrayList())
@@ -98,10 +101,7 @@ class MainActivity : AppCompatActivity() {
                     showLogoutConfirmationDialog()
                     return@setOnNavigationItemSelectedListener true
                 }
-                R.id.addFriendButton -> {
-                    navigateToAddFriendActivity()
-                    return@setOnNavigationItemSelectedListener true
-                }
+
                 else -> false
             }
         }
@@ -196,9 +196,8 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, AddFriendActivity::class.java)
         startActivity(intent)
     }
-    private fun navigateToScheduleInputActivity() {
-        val intent = Intent(this, ScheduleInputActivity::class.java)
-        intent.putExtra("selectedDate", selectedDate)
+    private fun navigateToUserListActivity() {
+        val intent = Intent(this, UserListActivity::class.java)
         startActivity(intent)
     }
     private fun saveSchedule(date: String, event: String) {

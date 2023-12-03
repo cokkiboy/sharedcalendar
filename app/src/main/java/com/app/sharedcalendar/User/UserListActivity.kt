@@ -1,48 +1,47 @@
 package com.app.sharedcalendar.User
 
-// Import R from your app's package
-import com.app.sharedcalendar.R
-
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.database.*
-import com.app.sharedcalendar.R.layout
+import com.app.sharedcalendar.databinding.ActivityUserListBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GetTokenResult
 
 class UserListActivity : AppCompatActivity() {
 
-    private lateinit var userRecyclerView: RecyclerView
-    private lateinit var userAdapter: UserAdapter
-    private lateinit var databaseReference: DatabaseReference
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private lateinit var binding: ActivityUserListBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(layout.activity_user_list)
+        binding = ActivityUserListBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        userRecyclerView = findViewById(R.id.userRecyclerView)
-        userAdapter = UserAdapter(emptyList())
-        userRecyclerView.adapter = userAdapter
-        userRecyclerView.layoutManager = LinearLayoutManager(this)
+        // 현재 로그인한 사용자 가져오기
+        val currentUser: FirebaseUser? = auth.currentUser
 
-        databaseReference = FirebaseDatabase.getInstance().reference.child("users")
+        if (currentUser != null) {
+            // 현재 사용자가 로그인한 경우
+            currentUser.getIdToken(true)
+                .addOnSuccessListener { result: GetTokenResult ->
+                    // Extract UID from the token
+                    val uid: String? = result.token
+                    if (uid != null) {
+                        Log.d("UserListActivity", "User UID: $uid")
 
-        // Listen for changes in the users node
-        databaseReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val users = mutableListOf<User>()
-                for (snapshot in dataSnapshot.children) {
-                    val userId = snapshot.key.orEmpty()
-                    val userName = snapshot.child("userName").getValue(String::class.java).orEmpty()
-                    val user = User(userId, userName)
-                    users.add(user)
+                        // UID를 TextView에 표시
+                        //binding.userRecyclerView.append("$uid\n")
+                    } else {
+                        Log.e("UserListActivity", "User UID is null")
+                    }
                 }
-                userAdapter.setUserList(users)
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                // Handle error
-            }
-        })
+                .addOnFailureListener { e ->
+                    Log.e("UserListActivity", "Error getting user list", e)
+                }
+        } else {
+            // 사용자가 로그인되어 있지 않은 경우
+            Log.d("UserListActivity", "User not logged in")
+        }
     }
 }

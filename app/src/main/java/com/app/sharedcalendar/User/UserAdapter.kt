@@ -35,7 +35,7 @@ class UserAdapter(private var userList: List<User>) : RecyclerView.Adapter<UserA
         private val userNameTextView: TextView = itemView.findViewById(R.id.userNameTextView)
 
         fun bind(user: User) {
-            userNameTextView.text = user.userName
+            userNameTextView.text = user.username
         }
     }
 }
