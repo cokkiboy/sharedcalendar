@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.app.sharedcalendar.User.User
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -81,7 +82,7 @@ class LoginActivity : AppCompatActivity() {
             val username = it.displayName ?: "DefaultUsername"
 
             // Firebase Realtime Database에 사용자 정보 저장
-            val userInfo = UserInfo(userId, username)
+            val userInfo = User(userId, username)
             val databaseReference = FirebaseDatabase.getInstance().reference
             databaseReference.child("users").child(userId).setValue(userInfo)
 

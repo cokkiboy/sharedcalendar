@@ -11,10 +11,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.app.sharedcalendar.Schedule.AddFriendActivity
+import com.app.sharedcalendar.AddFriend.AddFriendActivity
 import com.app.sharedcalendar.Schedule.ScheduleAdapter
 import com.app.sharedcalendar.Schedule.ScheduleInputActivity
 import com.app.sharedcalendar.Schedule.ScheduleListActivity
+
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -133,6 +134,9 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
+
+
 
     private fun loadDiary(date: String) {
         // 개인 일정 로드
