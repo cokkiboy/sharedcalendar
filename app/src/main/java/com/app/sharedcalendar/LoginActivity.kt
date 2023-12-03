@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.FirebaseDatabase
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var usernameEditText: EditText
@@ -72,5 +74,22 @@ class LoginActivity : AppCompatActivity() {
         val intent = Intent(this, RegisterActivity::class.java)
         startActivity(intent)
         finish()
+    }
+    private fun saveUserInfoAndNavigateToMainActivity(currentUser: FirebaseUser?) {
+        currentUser?.let {
+            val userId = it.uid
+            val username = it.displayName ?: "DefaultUsername"
+
+            // Firebase Realtime Database에 사용자 정보 저장
+            val userInfo = UserInfo(userId, username)
+            val databaseReference = FirebaseDatabase.getInstance().reference
+            databaseReference.child("users").child(userId).setValue(userInfo)
+
+            // MainActivity를 시작
+            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("userID", userId)
+            startActivity(intent)
+            finish() // LoginActivity를 종료하여 뒤로 가기 버튼으로 돌아갈 수 없도록 합니다.
+        }
     }
 }

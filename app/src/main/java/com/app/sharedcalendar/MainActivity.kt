@@ -1,9 +1,8 @@
 package com.app.sharedcalendar
 
-import android.content.DialogInterface
+import ScheduleItem
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import android.widget.Button
 import android.widget.CalendarView
 import android.widget.TextView
@@ -12,13 +11,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.app.sharedcalendar.Schedule.AddFriendActivity
 import com.app.sharedcalendar.Schedule.ScheduleAdapter
 import com.app.sharedcalendar.Schedule.ScheduleInputActivity
-import com.app.sharedcalendar.Schedule.ScheduleItem
 import com.app.sharedcalendar.Schedule.ScheduleListActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class MainActivity : AppCompatActivity() {
 
@@ -94,12 +97,8 @@ class MainActivity : AppCompatActivity() {
                     showLogoutConfirmationDialog()
                     return@setOnNavigationItemSelectedListener true
                 }
-                R.id.homeFragment -> {
-                    // Home 아이템이 선택되었을 때 추가 작업 또는 화면 전환 코드 작성
-                    return@setOnNavigationItemSelectedListener true
-                }
-                R.id.myPageFragment -> {
-                    // 검색 아이템이 선택되었을 때 추가 작업 또는 화면 전환 코드 작성
+                R.id.addFriendButton -> {
+                    navigateToAddFriendActivity()
                     return@setOnNavigationItemSelectedListener true
                 }
                 else -> false
@@ -136,7 +135,48 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadDiary(date: String) {
-        // 일정 불러오는 코드
+        // 개인 일정 로드
+        val userScheduleRef = database.child("schedules").child(userID)
+        userScheduleRef.orderByChild("date").equalTo(date).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val userScheduleList = mutableListOf<ScheduleItem>()
+
+                for (scheduleSnapshot in dataSnapshot.children) {
+                    val scheduleItem = scheduleSnapshot.getValue(ScheduleItem::class.java)
+                    scheduleItem?.let {
+                        userScheduleList.add(it)
+                    }
+                }
+
+                scheduleAdapter.setData(userScheduleList)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                showToast("일정 로드 실패: ${databaseError.message}")
+            }
+        })
+
+        // 공유 일정 로드
+        val sharedScheduleRef = database.child("sharedSchedules")
+        sharedScheduleRef.orderByChild("date").equalTo(date).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val sharedScheduleList = mutableListOf<ScheduleItem>()
+
+                for (scheduleSnapshot in dataSnapshot.children) {
+                    val sharedSchedule = scheduleSnapshot.getValue(ScheduleItem::class.java)
+                    sharedSchedule?.let {
+                        sharedScheduleList.add(it)
+                    }
+                }
+
+                scheduleAdapter.setData(sharedScheduleList)
+                scheduleAdapter.notifyDataSetChanged()
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                showToast("공유 일정 로드 실패: ${databaseError.message}")
+            }
+        })
     }
 
     private fun showToast(message: String) {
@@ -148,10 +188,47 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("userID", userID)
         startActivity(intent)
     }
-
+    private fun navigateToAddFriendActivity() {
+        val intent = Intent(this, AddFriendActivity::class.java)
+        startActivity(intent)
+    }
     private fun navigateToScheduleInputActivity() {
         val intent = Intent(this, ScheduleInputActivity::class.java)
         intent.putExtra("selectedDate", selectedDate)
         startActivity(intent)
     }
+    private fun saveSchedule(date: String, event: String) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        currentUser?.let { user ->
+            val userID = user.uid
+
+            // 개인 일정 저장
+            val userScheduleRef = database.child("schedules").child(userID)
+            val scheduleId = userScheduleRef.push().key
+            val scheduleData = mapOf(
+                "date" to date,
+                "event" to event,
+                "startTime" to "실제_시작_시간으로_업데이트", // 실제 시작 시간으로 업데이트
+                "endTime" to "실제_종료_시간으로_업데이트",   // 실제 종료 시간으로 업데이트
+                "userId" to userID
+            )
+            scheduleId?.let {
+                userScheduleRef.child(it).setValue(scheduleData)
+            }
+
+            // 공유 일정 저장
+            val sharedScheduleRef = database.child("sharedSchedules")
+            val sharedScheduleData = mapOf(
+                "date" to date,
+                "event" to event,
+                "startTime" to "실제_시작_시간으로_업데이트", // 실제 시작 시간으로 업데이트
+                "endTime" to "실제_종료_시간으로_업데이트",   // 실제 종료 시간으로 업데이트
+                "userId" to userID,
+                "sharedWith" to listOf("user_id_2", "user_id_3") // 공유할 사용자 ID 추가
+            )
+            sharedScheduleRef.push().setValue(sharedScheduleData)
+        }
+    }
+
+
 }

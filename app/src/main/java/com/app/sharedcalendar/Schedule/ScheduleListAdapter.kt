@@ -1,5 +1,6 @@
 package com.app.sharedcalendar.Schedule
 
+import ScheduleItem
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,7 +30,7 @@ class ScheduleListAdapter(
     }
 
     fun setData(newList: List<ScheduleItem>) {
-        scheduleList = newList
+        scheduleList = scheduleList + newList
         notifyDataSetChanged()
     }
 
@@ -41,4 +42,5 @@ class ScheduleListAdapter(
             // 기타 필요한 UI 업데이트
         }
     }
+
 }

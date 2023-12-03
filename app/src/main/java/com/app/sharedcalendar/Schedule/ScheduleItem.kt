@@ -1,7 +1,3 @@
-package com.app.sharedcalendar.Schedule
-
-
-
 data class ScheduleItem(
     val schedule: String,
     val startTime: String,

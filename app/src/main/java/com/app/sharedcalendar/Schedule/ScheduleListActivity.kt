@@ -1,5 +1,6 @@
 
 package com.app.sharedcalendar.Schedule
+import ScheduleItem
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -30,9 +31,7 @@ class ScheduleListActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerViewScheduleList)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        scheduleListAdapter = ScheduleListAdapter(ArrayList()) { scheduleItem ->
-            showEditOptionsDialog(scheduleItem)
-        }
+        scheduleListAdapter = ScheduleListAdapter(ArrayList(), ::showEditOptionsDialog)
         recyclerView.adapter = scheduleListAdapter
 
         // 여기서 loadSchedules 함수 호출

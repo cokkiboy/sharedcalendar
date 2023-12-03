@@ -67,7 +67,7 @@
         android:id="@+id/buttonGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="saveBtn,updateBtn,deleteBtn,logoutBtn"
+        app:constraint_referenced_ids="saveBtn,updateBtn,deleteBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/diaryContent" />
@@ -82,7 +82,7 @@
         app:layout_constraintTop_toTopOf="@+id/buttonGroup"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/updateBtn"
-        android:visibility="invisible" />
+        android:visibility="visible" />
 
     <!-- 수정 버튼 -->
     <Button
@@ -93,7 +93,7 @@
         app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
         app:layout_constraintStart_toEndOf="@+id/saveBtn"
         app:layout_constraintEnd_toStartOf="@+id/deleteBtn"
-        android:visibility="invisible" />
+        android:visibility="visible" />
 
     <!-- 삭제 버튼 -->
     <Button
@@ -104,18 +104,10 @@
         app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
         app:layout_constraintStart_toEndOf="@+id/updateBtn"
 
-        android:visibility="invisible" />
+        android:visibility="visible" />
 
     <!-- 로그아웃 버튼 -->
-    <Button
-        android:id="@+id/logoutBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="로그아웃"
-        app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
-        app:layout_constraintStart_toEndOf="@+id/deleteBtn"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:visibility="invisible" />
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigationView"
