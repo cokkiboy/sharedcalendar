@@ -1,7 +1,9 @@
 package com.app.sharedcalendar.User
 
+import com.google.firebase.auth.FirebaseUser
+
 data class User(
-    val uid:String,
-    val username: String,
-    val friends: List<String> = emptyList()
-)
+    val uid: String,
+    val email: String,
+    val firebaseUser: FirebaseUser?
+    )

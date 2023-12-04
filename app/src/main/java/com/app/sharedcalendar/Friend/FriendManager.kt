@@ -1,6 +1,7 @@
 package com.app.sharedcalendar.Friend
 
-import com.app.sharedcalendar.User.User
+
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 
 class FriendManager {
@@ -10,11 +11,7 @@ class FriendManager {
         return this
     }
     // 친구 요청 보내기
-    fun sendFriendRequest(senderUid: String, receiverUid: String) {
-        val friendRequestRef = databaseReference.child("friendRequests").push()
-        friendRequestRef.child("senderUid").setValue(senderUid)
-        friendRequestRef.child("receiverUid").setValue(receiverUid)
-    }
+
 
     // 친구 요청 수락
     fun acceptFriendRequest(senderUid: String, receiverUid: String) {
@@ -45,39 +42,10 @@ class FriendManager {
             }
         })
     }
-    fun addMember(groupId: String, friend: Friend) {
-        databaseReference.child("groups").child(groupId).child("members").push().setValue(friend)
-    }
-    fun addGroup(groupName: String) {
-        val groupId = databaseReference.child("groups").push().key
-        val group = Group(groupId!!, groupName)
-        databaseReference.child("groups").child(groupId).setValue(group)
-    }
+
+
     // 친구 목록 가져오기
-    fun getFriendList(uid: String, callback: (List<User>) -> Unit) {
-        val friendList = mutableListOf<User>()
-        val friendListRef = databaseReference.child("users").child(uid).child("friends")
 
-        friendListRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                for (friendSnapshot in dataSnapshot.children) {
-                    val friendUid = friendSnapshot.key
-                    friendUid?.let {
-                        // 실제로는 여기에서 사용자 정보를 조회하여 User 객체를 생성하는 작업이 필요
-                        // 이 예시에서는 User 모델이 어떻게 생겼는지 알 수 없으므로 가정으로 둡니다.
-                        val friend = User(uid = it, username = "Friend")
-                        friendList.add(friend)
-                    }
-                }
-                callback(friendList)
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                // 처리 중 에러 발생 시 작업
-                callback(emptyList())
-            }
-        })
-    }
 
     // 사용자 모델의 friends 필드 업데이트
     private fun updateFriendList(uid: String, friendUid: String) {
@@ -111,52 +79,38 @@ class FriendManager {
             }
         })
     }
-    fun getMembers(groupId: String, callback: (List<Friend>) -> Unit) {
-        databaseReference.child("groups").child(groupId).child("members")
+
+
+
+
+
+    fun inviteFriendToGroup(currentUserId: String, uid: String, groupId: String, callback: (Boolean) -> Unit) {
+        // Check if the user is already a member of the group
+        databaseReference.child("groups").child(groupId).child("members").child(uid)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val members = mutableListOf<Friend>()
-                    for (memberSnapshot in snapshot.children) {
-                        val member = memberSnapshot.getValue(Friend::class.java)
-                        member?.let {
-                            members.add(it)
-                        }
+                    if (snapshot.exists()) {
+                        // User is already a member, don't send an invitation again
+                        callback(true)
+                    } else {
+                        // User is not a member, send an invitation
+                        val invitationRef = databaseReference.child("groupInvitations").child(uid).child(groupId)
+                        invitationRef.setValue(currentUserId)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    callback(true)
+                                } else {
+                                    callback(false)
+                                }
+                            }
                     }
-                    callback(members)
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    // 에러 처리
-                }
-            })
-    }
-    fun shareData(groupId: String, data: Map<String, Any>, callback: (Boolean) -> Unit) {
-        val sharedScheduleRef = databaseReference.child("sharedSchedules").child(groupId)
-        val scheduleId = sharedScheduleRef.push().key
-
-        scheduleId?.let {
-            sharedScheduleRef.child(it).setValue(data)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        callback(true)
-                    } else {
-                        callback(false)
-                    }
-                }
-        }
-    }
-
-    fun addFriend(currentUserId: String, uid: String, callback: (Boolean) -> Unit) {
-        // 사용자 모델의 friends 필드 업데이트
-        val friendListRef = databaseReference.child("users").child(currentUserId).child("friends")
-        friendListRef.child(uid).setValue(true)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    callback(true)
-                } else {
+                    // Handle onCancelled if needed
                     callback(false)
                 }
-            }
+            })
     }
 
 

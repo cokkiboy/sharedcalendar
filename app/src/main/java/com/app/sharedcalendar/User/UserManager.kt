@@ -1,5 +1,6 @@
 package com.app.sharedcalendar.User
 
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -20,10 +21,10 @@ class UserManager {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (userSnapshot in dataSnapshot.children) {
                     val uid = userSnapshot.key
-                    val username = userSnapshot.child("username").getValue(String::class.java)
+                    val email = userSnapshot.child("email").getValue(String::class.java)
 
-                    if (uid != null && username != null) {
-                        val user = User(uid = uid, username = username)
+                    if (uid != null && email != null) {
+                        val user = User(uid = uid, email = email, firebaseUser = null)
                         userList.add(user)
                     }
                 }
@@ -37,39 +38,36 @@ class UserManager {
         })
     }
 
-    // UserManager.kt
+    fun getUserByEmail(email: String, callback: (User?) -> Unit) {
+        val usersRef = databaseReference.child("users")
+        val query = usersRef.orderByChild("email").equalTo(email)
 
+        query.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for (userSnapshot in dataSnapshot.children) {
+                    val uid = userSnapshot.key
+                    val userEmail = userSnapshot.child("email").getValue(String::class.java)
 
-
-        // ...
-
-        fun getUserByEmail(email: String, callback: (User?) -> Unit) {
-            val usersRef = databaseReference.child("users")
-            val query = usersRef.orderByChild("email").equalTo(email)
-
-            query.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    for (userSnapshot in dataSnapshot.children) {
-                        val uid = userSnapshot.key
-                        val username = userSnapshot.child("username").getValue(String::class.java)
-
-                        if (uid != null && username != null) {
-                            val user = User(uid = uid, username = username)
-                            callback(user)
-                            return
-                        }
+                    if (uid != null && userEmail != null) {
+                        val user = User(uid = uid, email = userEmail, firebaseUser = null)
+                        callback(user)
+                        return
                     }
-                    callback(null)
                 }
+                callback(null)
+            }
 
-                override fun onCancelled(databaseError: DatabaseError) {
-                    // Handle error
-                    callback(null)
-                }
-            })
-        }
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Handle error
+                callback(null)
+            }
+        })
+    }
 
-
+    fun FirebaseUser(user: FirebaseUser?): Boolean {
+        // FirebaseUser 객체가 null이 아니고, providerData 목록에 "firebase"가 포함되어 있는지 확인
+        return user != null && user.providerData.any { it.providerId == "firebase" }
+    }
 
 
 }
