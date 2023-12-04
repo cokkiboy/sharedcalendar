@@ -104,7 +104,8 @@
         android:text="친구 추가"
         app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
         app:layout_constraintStart_toEndOf="@+id/updateBtn"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:onClick="showAddFriendDialog" />
 
     <!-- 사용자 목록 버튼 -->
     <Button
@@ -114,7 +115,8 @@
         android:text="사용자 목록"
         app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
         app:layout_constraintStart_toEndOf="@+id/addFriendButton"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:onClick="navigateToUserListActivity" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigationView"

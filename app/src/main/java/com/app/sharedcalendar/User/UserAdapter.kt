@@ -1,7 +1,5 @@
 package com.app.sharedcalendar.User
 
-// UserAdapter.kt
-// UserAdapter.kt
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

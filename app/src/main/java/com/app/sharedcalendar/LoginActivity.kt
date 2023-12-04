@@ -2,16 +2,14 @@ package com.app.sharedcalendar
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.app.sharedcalendar.User.User
-import com.google.firebase.FirebaseApp
+import com.app.sharedcalendar.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.FirebaseDatabase
+
+//로그인 부분 해쉬처리
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var usernameEditText: EditText
@@ -19,11 +17,13 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var loginButton: Button
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var joinButton: Button
+    private lateinit var binding: ActivityLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
-        FirebaseApp.initializeApp(this)
+        binding= ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         // Firebase Authentication 초기화
         firebaseAuth = FirebaseAuth.getInstance()
 
@@ -39,24 +39,29 @@ class LoginActivity : AppCompatActivity() {
             val password = passwordEditText.text.toString()
 
             // Firebase Authentication을 사용하여 이메일 및 비밀번호로 로그인 시도
-            if (username.isNotEmpty() && password.isNotEmpty()) {
-                firebaseAuth.signInWithEmailAndPassword(username, password)
-                    .addOnCompleteListener(this) { task ->
-                        if (task.isSuccessful) {
-                            showToast("로그인 완료")
-                            saveUserInfoAndNavigateToMainActivity(firebaseAuth.currentUser)
+            firebaseAuth.signInWithEmailAndPassword(username, password)
+                .addOnCompleteListener(this) { task ->
+                    if (task != null && task.isSuccessful) {
+                        // 로그인 성공
+                        showToast("로그인 완료")
+
+                        // 여기에서 로그인 이후의 화면으로 이동합니다.
+                        navigateMainActivity()
+                    } else {
+                        // 로그인 실패
+                        if (task != null) {
+                            showToast("실패 이유: ${task.exception?.message}")
                         } else {
-                            showToast("로그인 실패: ${task.exception?.message}")
-                            Log.e("LoginActivity", "Firebase 로그인 실패: ${task.exception}", task.exception)
+                            showToast("로그인 작업이 널입니다.")
                         }
+                        showToast("로그인 실패: ${task.exception?.message}")
                     }
-            } else {
-                showToast("이메일 또는 비밀번호를 입력하세요.")
-            }
+                }
         }
 
-        joinButton.setOnClickListener {
-            navigateToRegisterActivity()
+        binding.joinButton.setOnClickListener{
+            val intent : Intent = Intent(this@LoginActivity,RegisterActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -65,33 +70,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateMainActivity() {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this@LoginActivity, MainActivity::class.java)
         intent.putExtra("userID", firebaseAuth.currentUser?.uid)
         startActivity(intent)
-        finish() // LoginActivity를 종료하여 뒤로 가기 버튼으로 돌아갈 수 없도록 합니다.
+        finish() // Optional: Finish the current activity so that it can't be navigated back to.
     }
 
-    private fun navigateToRegisterActivity() {
-        val intent = Intent(this, RegisterActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
 
-    private fun saveUserInfoAndNavigateToMainActivity(currentUser: FirebaseUser?) {
-        currentUser?.let {
-            val userId = it.uid
-            val username = it.displayName ?: "DefaultUsername"
-
-            // Firebase Realtime Database에 사용자 정보 저장
-            val userInfo = User( uid= userId , username=username)
-            val databaseReference = FirebaseDatabase.getInstance().reference
-            databaseReference.child("users").child(userId).setValue(userInfo)
-
-            // MainActivity를 시작
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("userID", userId)
-            startActivity(intent)
-            finish() // LoginActivity를 종료하여 뒤로 가기 버튼으로 돌아갈 수 없도록 합니다.
-        }
-    }
 }

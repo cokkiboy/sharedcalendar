@@ -1,11 +1,14 @@
 package com.app.sharedcalendar.Friend
 
 import android.os.Bundle
+import android.text.InputType
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.app.sharedcalendar.R
+import com.app.sharedcalendar.User.UserManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 
@@ -26,7 +29,9 @@ class AddFriendActivity : AppCompatActivity() {
 
         friendNameEditText = findViewById(R.id.friendNameEditText)
         addFriendButton = findViewById(R.id.addFriendButton)
-
+        addFriendButton.setOnClickListener {
+            showAddFriendDialog()
+        }
         databaseReference = FirebaseDatabase.getInstance().reference
 
         addFriendButton.setOnClickListener {
@@ -55,5 +60,46 @@ class AddFriendActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+    private fun showAddFriendDialog() {
+        val alertDialogBuilder = AlertDialog.Builder(this)
+        alertDialogBuilder.setTitle("친구 추가")
+        alertDialogBuilder.setMessage("친구의 이메일을 입력하세요.")
+
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+        alertDialogBuilder.setView(input)
+
+        alertDialogBuilder.setPositiveButton("추가") { _, _ ->
+            val friendEmail = input.text.toString()
+            addFriendByEmail(friendEmail)
+        }
+
+        alertDialogBuilder.setNegativeButton("취소") { _, _ ->
+            // 다이얼로그를 닫거나 추가 작업 수행
+        }
+
+        val alertDialog: AlertDialog = alertDialogBuilder.create()
+        alertDialog.show()
+    }
+
+    private fun addFriendByEmail(email: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.let { currentUser ->
+            val currentUserId = currentUser.uid
+
+            val userManager = UserManager()
+            userManager.getUserByEmail(email) { friend ->
+                friend?.let {
+                    friendManager.addFriend(currentUserId, friend.uid) { success ->
+                        if (success) {
+                            showToast("친구 추가 성공")
+                        } else {
+                            showToast("친구 추가 실패")
+                        }
+                    }
+                } ?: showToast("존재하지 않는 사용자입니다.")
+            }
+        }
     }
 }

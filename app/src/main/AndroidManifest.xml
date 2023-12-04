@@ -21,6 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
+
+        <activity android:name=".Friend.FriendRequestActivity"/>
         <activity android:name=".Friend.AddFriendActivity"/>
         <activity android:name=".RegisterActivity"/>
         <activity android:name=".MainActivity" />

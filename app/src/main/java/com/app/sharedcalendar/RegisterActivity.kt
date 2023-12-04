@@ -6,7 +6,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.app.sharedcalendar.databinding.ActivityRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var nameEditText: EditText
@@ -15,7 +17,8 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var passwordConfirmEditText: EditText
     private lateinit var joinButton: Button
     private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var cancelbutton:Button
+    lateinit var binding: ActivityRegisterBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
@@ -29,7 +32,7 @@ class RegisterActivity : AppCompatActivity() {
         passwordEditText = findViewById(R.id.join_password)
         passwordConfirmEditText = findViewById(R.id.join_pwck)
         joinButton = findViewById(R.id.join_button)
-        cancelbutton =findViewById(R.id.cancel_button)
+
         // 회원가입 버튼 클릭 리스너 설정
         joinButton.setOnClickListener {
             val name = nameEditText.text.toString()
@@ -46,8 +49,14 @@ class RegisterActivity : AppCompatActivity() {
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
+                            val userId = firebaseAuth.currentUser?.uid
+                            val userReference = FirebaseDatabase.getInstance().getReference("users").child(userId.orEmpty())
+                            val userData = hashMapOf(
+                                "name" to name
+                            )
+                            userReference.setValue(userData)
+
                             // 회원가입 성공
-                            //Log.d("MyApp", "회원가입 성공")
                             showToast("회원가입 성공")
                             navigateToLoginActivity()
                         } else {
@@ -57,10 +66,6 @@ class RegisterActivity : AppCompatActivity() {
                     }
             }
         }
-        cancelbutton.setOnClickListener {
-            navigateToLoginActivity()
-        }
-
     }
 
     private fun areFieldsEmpty(name: String, email: String, password: String, passwordConfirm: String): Boolean {

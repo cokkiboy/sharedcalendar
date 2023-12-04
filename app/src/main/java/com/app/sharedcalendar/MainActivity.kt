@@ -1,10 +1,13 @@
 package com.app.sharedcalendar
 
 import ScheduleItem
+
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.widget.Button
 import android.widget.CalendarView
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -12,10 +15,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.sharedcalendar.Friend.AddFriendActivity
+import com.app.sharedcalendar.Friend.FriendManager
 import com.app.sharedcalendar.Schedule.ScheduleAdapter
 import com.app.sharedcalendar.Schedule.ScheduleInputActivity
 import com.app.sharedcalendar.Schedule.ScheduleListActivity
+
 import com.app.sharedcalendar.User.UserListActivity
+import com.app.sharedcalendar.User.UserManager
+
 
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -29,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var saveBtn: Button
     lateinit var updateBtn: Button
-    lateinit var deleteBtn: Button
+
     lateinit var diaryContent: TextView
     private lateinit var database: DatabaseReference
     private lateinit var userID: String
@@ -39,18 +46,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var scheduleAdapter: ScheduleAdapter
     private lateinit var bottomNavigationView: BottomNavigationView
-
+    private lateinit var friendManager: FriendManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         saveBtn = findViewById(R.id.saveBtn)
         updateBtn = findViewById(R.id.updateBtn)
-        val userListButton: Button = findViewById(R.id.userListButton)
+
         diaryContent = findViewById(R.id.diaryContent)
         calendarView = findViewById(R.id.calendarView)
         bottomNavigationView = findViewById(R.id.navigationView)
         val addFriendButton: Button = findViewById(R.id.addFriendButton)
+
         userID = intent.getStringExtra("userID") ?: ""
         database = FirebaseDatabase.getInstance().reference
         val firebaseAuth = FirebaseAuth.getInstance()
@@ -68,9 +76,8 @@ class MainActivity : AppCompatActivity() {
             loadDiary(date)
         }
 
-        userListButton.setOnClickListener {
-            navigateToUserListActivity()
-        }
+
+
 
         updateBtn.setOnClickListener {
             navigateToScheduleList()
@@ -134,9 +141,6 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
-
-
 
     private fun loadDiary(date: String) {
         // 개인 일정 로드
@@ -232,6 +236,5 @@ class MainActivity : AppCompatActivity() {
             sharedScheduleRef.push().setValue(sharedScheduleData)
         }
     }
-
 
 }
