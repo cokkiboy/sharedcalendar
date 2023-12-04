@@ -107,16 +107,7 @@
         android:visibility="visible"
         android:onClick="showAddFriendDialog" />
 
-    <!-- 사용자 목록 버튼 -->
-    <Button
-        android:id="@+id/userListButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="사용자 목록"
-        app:layout_constraintBaseline_toBaselineOf="@+id/saveBtn"
-        app:layout_constraintStart_toEndOf="@+id/addFriendButton"
-        android:visibility="visible"
-        android:onClick="navigateToUserListActivity" />
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigationView"

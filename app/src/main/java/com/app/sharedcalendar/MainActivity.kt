@@ -1,7 +1,7 @@
 package com.app.sharedcalendar
 
-import ScheduleItem
 
+import ScheduleItem
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
@@ -14,16 +14,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.app.sharedcalendar.Friend.AddFriendActivity
 import com.app.sharedcalendar.Friend.FriendManager
 import com.app.sharedcalendar.Schedule.ScheduleAdapter
 import com.app.sharedcalendar.Schedule.ScheduleInputActivity
 import com.app.sharedcalendar.Schedule.ScheduleListActivity
-
 import com.app.sharedcalendar.User.UserListActivity
 import com.app.sharedcalendar.User.UserManager
-
-
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -36,7 +32,8 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var saveBtn: Button
     lateinit var updateBtn: Button
-
+    private lateinit var addFriendButton: Button
+    private lateinit var friendNameEditText: EditText
     lateinit var diaryContent: TextView
     private lateinit var database: DatabaseReference
     private lateinit var userID: String
@@ -46,18 +43,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var scheduleAdapter: ScheduleAdapter
     private lateinit var bottomNavigationView: BottomNavigationView
-    private lateinit var friendManager: FriendManager
+    private val friendManager: FriendManager = FriendManager()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         saveBtn = findViewById(R.id.saveBtn)
         updateBtn = findViewById(R.id.updateBtn)
-
+        addFriendButton =findViewById(R.id.addFriendButton)
         diaryContent = findViewById(R.id.diaryContent)
         calendarView = findViewById(R.id.calendarView)
         bottomNavigationView = findViewById(R.id.navigationView)
-        val addFriendButton: Button = findViewById(R.id.addFriendButton)
+
 
         userID = intent.getStringExtra("userID") ?: ""
         database = FirebaseDatabase.getInstance().reference
@@ -91,9 +88,9 @@ class MainActivity : AppCompatActivity() {
             loadDiary(selectedDate)
         }
         addFriendButton.setOnClickListener {
-            // Handle button click event, e.g., navigate to AddFriendActivity
-            navigateToAddFriendActivity()
+            showAddFriendDialog()
         }
+
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         scheduleAdapter = ScheduleAdapter(ArrayList())
@@ -196,14 +193,12 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("userID", userID)
         startActivity(intent)
     }
-    private fun navigateToAddFriendActivity() {
-        val intent = Intent(this, AddFriendActivity::class.java)
-        startActivity(intent)
-    }
+
     private fun navigateToUserListActivity() {
         val intent = Intent(this, UserListActivity::class.java)
         startActivity(intent)
     }
+
     private fun saveSchedule(date: String, event: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         currentUser?.let { user ->
@@ -234,6 +229,47 @@ class MainActivity : AppCompatActivity() {
                 "sharedWith" to listOf("user_id_2", "user_id_3") // 공유할 사용자 ID 추가
             )
             sharedScheduleRef.push().setValue(sharedScheduleData)
+        }
+    }
+    private fun showAddFriendDialog() {
+        val alertDialogBuilder = AlertDialog.Builder(this)
+        alertDialogBuilder.setTitle("친구 추가")
+        alertDialogBuilder.setMessage("친구의 이메일을 입력하세요.")
+
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+        alertDialogBuilder.setView(input)
+
+        alertDialogBuilder.setPositiveButton("추가") { _, _ ->
+            val friendEmail = input.text.toString()
+            addFriendByEmail(friendEmail)
+        }
+
+        alertDialogBuilder.setNegativeButton("취소") { _, _ ->
+            // 다이얼로그를 닫거나 추가 작업 수행
+        }
+
+        val alertDialog: AlertDialog = alertDialogBuilder.create()
+        alertDialog.show()
+    }
+
+    private fun addFriendByEmail(email: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.let { currentUser ->
+            val currentUserId = currentUser.uid
+
+            val userManager = UserManager()
+            userManager.getUserByEmail(email) { friend ->
+                friend?.let {
+                    friendManager.addFriend(currentUserId, friend.uid) { success ->
+                        if (success) {
+                            showToast("친구 추가 성공")
+                        } else {
+                            showToast("친구 추가 실패")
+                        }
+                    }
+                } ?: showToast("존재하지 않는 사용자입니다.")
+            }
         }
     }
 
